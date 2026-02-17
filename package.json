@@ -1,0 +1,11 @@
+{
+  "name": "bunpress",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "bun run src/index.ts build",
+    "build:drafts": "bun run src/index.ts build --drafts",
+    "dev": "bun run src/index.ts dev",
+    "preview": "bun run src/index.ts preview"
+  }
+}
