@@ -393,10 +393,10 @@ This is your new BunPress site. Start editing \`content/index.md\` to get starte
     version: "1.0.0",
     type: "module",
     scripts: {
-      build: "bunpress build",
-      "build:drafts": "bunpress build --drafts",
-      dev: "bunpress dev",
-      preview: "bunpress preview",
+      build: "buntastic build",
+      "build:drafts": "buntastic build --drafts",
+      dev: "buntastic dev",
+      preview: "buntastic preview",
     },
   };
 
@@ -427,7 +427,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #eee; }
   await writeFile(join(root, "public/style.css"), styleCss);
 
   console.log("Initialized BunPress project!");
-  console.log("Run 'bunpress dev' to start the dev server.");
+  console.log("Run 'buntastic dev' to start the dev server.");
 }
 
 const args = process.argv.slice(2);
@@ -444,9 +444,9 @@ if (command === "init") {
   preview();
 } else {
   console.log("Usage:");
-  console.log("  bunpress init         - Initialize a new project");
-  console.log("  bunpress build        - Build for production");
-  console.log("  bunpress build --drafts - Build with drafts");
-  console.log("  bunpress dev          - Development mode");
-  console.log("  bunpress preview      - Serve dist folder");
+  console.log("  buntastic init         - Initialize a new project");
+  console.log("  buntastic build        - Build for production");
+  console.log("  buntastic build --drafts - Build with drafts");
+  console.log("  buntastic dev          - Development mode");
+  console.log("  buntastic preview      - Serve dist folder");
 }

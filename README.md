@@ -1,8 +1,8 @@
-# BunPress
+# Buntastic
 
 A simple static site generator built with Bun.
 
-## Why BunPress?
+## Why Buntastic?
 
 - **Zero dependencies** - Uses only Bun's built-in APIs
 - **Fast** - Powered by Bun's native markdown parser
@@ -17,19 +17,19 @@ A simple static site generator built with Bun.
 # Install Bun (if needed)
 curl -fsSL https://bun.sh/install | bash
 
-# Install bunpress globally
-bun install -g bunpress
+# Install buntastic globally
+bun install -g buntastic
 
 # Or use npx without installing
-npx bunpress build
+npx buntastic build
 ```
 
 ### For development
 
 ```bash
 # Clone the repo
-git clone https://github.com/jsnchn/bunpress.git
-cd bunpress
+git clone https://github.com/jsnchn/buntastic.git
+cd buntastic
 
 # Start the dev server
 bun run dev
@@ -40,7 +40,7 @@ Visit `http://localhost:3000` to see your site.
 ## Project Structure
 
 ```
-bunpress/
+buntastic/
 ├── content/               # Your markdown content
 │   ├── index.md          # → /
 │   ├── about.md          # → /about
@@ -57,10 +57,10 @@ bunpress/
 
 | Command | Description |
 |---------|-------------|
-| `bunpress build` | Build for production (excludes drafts) |
-| `bunpress build --drafts` | Build with drafts included |
-| `bunpress dev` | Watch mode + dev server |
-| `bunpress preview` | Serve the built `dist/` folder |
+| `buntastic build` | Build for production (excludes drafts) |
+| `buntastic build --drafts` | Build with drafts included |
+| `buntastic dev` | Watch mode + dev server |
+| `buntastic preview` | Serve the built `dist/` folder |
 
 Or with bun run (if using from source):
 

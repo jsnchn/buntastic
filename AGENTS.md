@@ -1,11 +1,11 @@
-# BunPress
+# Buntastic
 
 A simple static site generator built with Bun.
 
 ## Project Structure
 
 ```
-bunpress/
+buntastic/
 ├── content/               # File-based routing source
 │   ├── index.md          # → /
 │   ├── about.md          # → /about
