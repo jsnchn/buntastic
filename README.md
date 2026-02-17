@@ -9,15 +9,27 @@ A simple static site generator built with Bun.
 - **Simple** - No complex configuration needed
 - **Flexible** - Layouts with inheritance, collections, drafts
 
-## Quick Start
+## Installation
+
+### As a CLI tool (recommended)
+
+```bash
+# Install Bun (if needed)
+curl -fsSL https://bun.sh/install | bash
+
+# Install bunpress globally
+bun install -g bunpress
+
+# Or use npx without installing
+npx bunpress build
+```
+
+### For development
 
 ```bash
 # Clone the repo
 git clone https://github.com/jsnchn/bunpress.git
 cd bunpress
-
-# Install Bun (if needed)
-curl -fsSL https://bun.sh/install | bash
 
 # Start the dev server
 bun run dev
@@ -42,6 +54,15 @@ bunpress/
 ```
 
 ## Commands
+
+| Command | Description |
+|---------|-------------|
+| `bunpress build` | Build for production (excludes drafts) |
+| `bunpress build --drafts` | Build with drafts included |
+| `bunpress dev` | Watch mode + dev server |
+| `bunpress preview` | Serve the built `dist/` folder |
+
+Or with bun run (if using from source):
 
 | Command | Description |
 |---------|-------------|

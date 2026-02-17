@@ -1,11 +1,12 @@
+#!/usr/bin/env bun
 import { mkdir, writeFile, readFile, copyFile, exists } from "fs/promises";
 import { join, relative, dirname, extname } from "path";
 import { Glob } from "bun";
 
-const CONTENT_DIR = "content";
-const LAYOUTS_DIR = "src/layouts";
-const PUBLIC_DIR = "public";
-const DIST_DIR = "dist";
+const CONTENT_DIR = join(process.cwd(), "content");
+const LAYOUTS_DIR = join(process.cwd(), "src/layouts");
+const PUBLIC_DIR = join(process.cwd(), "public");
+const DIST_DIR = join(process.cwd(), "dist");
 
 interface Frontmatter {
   title?: string;
@@ -337,10 +338,104 @@ async function preview(): Promise<void> {
   });
 }
 
+async function init(): Promise<void> {
+  const root = process.cwd();
+
+  const dirs = ["content/posts", "src/layouts", "public"];
+  for (const dir of dirs) {
+    await mkdir(join(root, dir), { recursive: true });
+  }
+
+  const baseLayout = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <meta name="description" content="{{ description }}">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Home</a>
+    </nav>
+  </header>
+  <main>
+    {{ content | safe }}
+  </main>
+  <footer>
+    <p>Built with BunPress</p>
+  </footer>
+</body>
+</html>`;
+
+  const pageLayout = `---
+extends: base.html
+---
+<article class="page">
+  <h1>{{ title }}</h1>
+  {{ content | safe }}
+</article>`;
+
+  const indexMd = `---
+title: Welcome
+description: Welcome to my site
+---
+
+# Welcome
+
+This is your new BunPress site. Start editing \`content/index.md\` to get started!
+`;
+
+  const packageJson = {
+    name: "my-site",
+    version: "1.0.0",
+    type: "module",
+    scripts: {
+      build: "bunpress build",
+      "build:drafts": "bunpress build --drafts",
+      dev: "bunpress dev",
+      preview: "bunpress preview",
+    },
+  };
+
+  const styleCss = `* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+a { color: #0066cc; }
+h1, h2, h3 { margin: 1.5rem 0 1rem; }
+main { min-height: 60vh; }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #eee; }
+`;
+
+  await writeFile(join(root, "src/layouts/base.html"), baseLayout);
+  await writeFile(join(root, "src/layouts/page.html"), pageLayout);
+  await writeFile(join(root, "content/index.md"), indexMd);
+  await writeFile(join(root, "package.json"), JSON.stringify(packageJson, null, 2));
+  await writeFile(join(root, "public/style.css"), styleCss);
+
+  console.log("Initialized BunPress project!");
+  console.log("Run 'bunpress dev' to start the dev server.");
+}
+
 const args = process.argv.slice(2);
 const command = args[0];
 
-if (command === "build") {
+if (command === "init") {
+  init();
+} else if (command === "build") {
   const drafts = args.includes("--drafts");
   build(drafts);
 } else if (command === "dev") {
@@ -349,8 +444,9 @@ if (command === "build") {
   preview();
 } else {
   console.log("Usage:");
-  console.log("  bun run build        - Build for production");
-  console.log("  bun run build --drafts - Build with drafts");
-  console.log("  bun run dev          - Development mode");
-  console.log("  bun run preview      - Serve dist folder");
+  console.log("  bunpress init         - Initialize a new project");
+  console.log("  bunpress build        - Build for production");
+  console.log("  bunpress build --drafts - Build with drafts");
+  console.log("  bunpress dev          - Development mode");
+  console.log("  bunpress preview      - Serve dist folder");
 }
