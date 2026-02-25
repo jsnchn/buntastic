@@ -1,6 +1,6 @@
 {
   "name": "@jsnchn/buntastic",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A simple static site generator built with Bun",
   "type": "module",
   "bin": {
