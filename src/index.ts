@@ -1,4 +1,3 @@
-#!/usr/bin/env bun
 import { mkdir, writeFile, readFile, copyFile, exists } from "fs/promises";
 import { join, relative, dirname, extname } from "path";
 import { Glob } from "bun";
