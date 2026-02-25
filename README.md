@@ -11,16 +11,28 @@ A simple static site generator built with Bun.
 
 ## Installation
 
-### As a CLI tool (recommended)
+### Standalone binary (recommended - no dependencies required)
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/jsnchn/buntastic/releases):
 
 ```bash
-# Install Bun (if needed)
-curl -fsSL https://bun.sh/install | bash
+# Linux/macOS
+curl -fsSL https://github.com/jsnchn/buntastic/releases/latest/download/buntastic -o buntastic
+chmod +x buntastic
 
-# Install buntastic globally
-bun install -g buntastic
+# Windows (PowerShell)
+iwr https://github.com/jsnchn/buntastic/releases/latest/download/buntastic.exe -o buntastic.exe
+```
 
-# Or use npx without installing
+Then run `./buntastic` (or `buntastic.exe` on Windows).
+
+### With Bun or Node
+
+```bash
+# With bun
+bunx buntastic build
+
+# With npx (Node.js)
 npx buntastic build
 ```
 
@@ -31,8 +43,11 @@ npx buntastic build
 git clone https://github.com/jsnchn/buntastic.git
 cd buntastic
 
+# Build the binary
+bun run build:binary
+
 # Start the dev server
-bun run dev
+./buntastic dev
 ```
 
 Visit `http://localhost:3000` to see your site.
@@ -79,7 +94,7 @@ Buntastic commands interact with your project in different ways:
 
 **Destructive command** (`init`) creates new files and **will overwrite** an existing `package.json`. Use this only on new projects or when you want to start fresh.
 
-Or with bun run (if using from source):
+Or when using from source with bun:
 
 | Command | Description |
 |---------|-------------|
@@ -88,6 +103,8 @@ Or with bun run (if using from source):
 | `bun run dev` | Watch mode + dev server |
 | `bun run preview` | Serve the built `dist/` folder |
 | `bun run init` | Initialize a new project (creates files) |
+
+Note: When using from source, `bun run dev` internally runs `./buntastic dev` after building.
 
 ## Writing Content
 
@@ -230,10 +247,12 @@ Drafts are included when running `bun run build:drafts`.
 
 ## Tech Stack
 
-- [Bun](https://bun.sh) - JavaScript runtime
+- [Bun](https://bun.sh) - Runtime used to build the binary
 - Bun.markdown - Built-in GFM markdown parser
 - Bun.serve - HTTP server
 - Bun.watch - File watching
+
+The published binary has no runtime dependencies - users don't need Bun or Node.js installed.
 
 ## License
 
