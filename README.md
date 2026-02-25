@@ -61,6 +61,23 @@ buntastic/
 | `buntastic build --drafts` | Build with drafts included |
 | `buntastic dev` | Watch mode + dev server |
 | `buntastic preview` | Serve the built `dist/` folder |
+| `buntastic init` | Initialize a new project (creates files) |
+
+## File Structure Safety
+
+Buntastic commands interact with your project in different ways:
+
+| Command | Modifies Source Files? |
+|---------|----------------------|
+| `build` | No - only creates/updates `dist/` |
+| `build --drafts` | No - only creates/updates `dist/` |
+| `dev` | No - only creates/updates `dist/` |
+| `preview` | No - only reads `dist/` |
+| `init` | **Yes** - creates `content/`, `src/layouts/`, `public/`, and `package.json` |
+
+**Safe commands** (`build`, `dev`, `preview`) only read from your source files and output to the `dist/` folder. They will not modify your `content/`, `src/layouts/`, `public/`, or `package.json`.
+
+**Destructive command** (`init`) creates new files and **will overwrite** an existing `package.json`. Use this only on new projects or when you want to start fresh.
 
 Or with bun run (if using from source):
 
@@ -70,6 +87,7 @@ Or with bun run (if using from source):
 | `bun run build:drafts` | Build with drafts included |
 | `bun run dev` | Watch mode + dev server |
 | `bun run preview` | Serve the built `dist/` folder |
+| `bun run init` | Initialize a new project (creates files) |
 
 ## Writing Content
 
