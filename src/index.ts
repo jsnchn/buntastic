@@ -113,46 +113,23 @@ async function resolveLayout(frontmatter: Frontmatter): Promise<{ template: stri
         childHead = headMatch[1].trim();
       }
       
-      const bodyMatch = childContent.match(/\[content\]([\s\S]*?)\[\/content\]/);
-      if (bodyMatch) {
-        childBody = bodyMatch[1];
-      } else {
-        childBody = childContent;
-      }
+      childBody = childContent;
 
       const parentResult = await resolveLayout({ extends: parentLayout[1] } as Frontmatter);
       
       let contentReplaced = parentResult.template;
       
-      if (bodyMatch) {
-        contentReplaced = contentReplaced.replace(
-          /\[content\]([\s\S]*?)\[\/content\]/g, 
-          childBody
-        );
-      } else {
-        contentReplaced = contentReplaced.replace(
-          /\{\{\s*content\s*\|\s*safe\s*\}\}/g, 
-          childBody
-        );
-      }
+      contentReplaced = contentReplaced.replace(
+        /\{\{\s*content\s*\|\s*safe\s*\}\}/g, 
+        childBody
+      );
       
       const mergedHead = parentResult.head + (childHead ? "\n" + childHead : "");
       
-      if (headMatch) {
-        contentReplaced = contentReplaced.replace(
-          /\[head\]([\s\S]*?)\[\/head\]/g,
-          mergedHead
-        );
-      } else {
-        contentReplaced = contentReplaced.replace(
-          /\[head\]([\s\S]*?)\[\/head\]/g,
-          mergedHead
-        );
-        contentReplaced = contentReplaced.replace(
-          /\{\{\s*head\s*\|\s*safe\s*\}\}/g,
-          mergedHead
-        );
-      }
+      contentReplaced = contentReplaced.replace(
+        /<\/head>/i,
+        `\n${mergedHead}\n</head>`
+      );
       
       return { template: contentReplaced, head: mergedHead };
     }
@@ -160,8 +137,7 @@ async function resolveLayout(frontmatter: Frontmatter): Promise<{ template: stri
 
   let ownHead = "";
   if (extendsMatch) {
-    const bodyMatch = extendsMatch[2];
-    const headMatch = bodyMatch.match(/\[head\]([\s\S]*?)\[\/head\]/);
+    const headMatch = extendsMatch[2].match(/\[head\]([\s\S]*?)\[\/head\]/);
     ownHead = headMatch ? headMatch[1].trim() : "";
   }
 

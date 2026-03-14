@@ -64,7 +64,6 @@ draft: false             # Set true to exclude from production build
 | `{{ description }}` | Page description |
 | `{{ url }}` | Current page URL |
 | `{{ collection }}` | Array of posts in current folder (for index pages) |
-| `{{ head \| safe }}` | Head content from child layouts (appended to parent) |
 
 ## Layout System
 
@@ -85,7 +84,7 @@ The `{{ content | safe }}` placeholder is where child content gets injected.
 
 ## Head Block
 
-Layouts can inject content into the `<head>` section using `[head]...[/head]` blocks:
+Layouts can inject content into the `<head>` section using `[head]...[/head]` blocks. Content inside these blocks is automatically merged and appended to the `<head>` element in the parent layout:
 
 ```html
 <!-- layouts/post.html -->
@@ -95,15 +94,13 @@ extends: base.html
 [head]
 <link rel="stylesheet" href="/post.css">
 [/head]
-[content]
 <article class="post">
   <h1>{{ title }}</h1>
   {{ content | safe }}
 </article>
-[/content]
 ```
 
-Content inside `[head]` blocks is automatically placed in the parent's `<head>` section. Child layout head content is appended to parent head content.
+Head content from child layouts is appended to parent head content.
 
 ## Development
 
