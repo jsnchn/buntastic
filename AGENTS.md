@@ -64,6 +64,7 @@ draft: false             # Set true to exclude from production build
 | `{{ description }}` | Page description |
 | `{{ url }}` | Current page URL |
 | `{{ collection }}` | Array of posts in current folder (for index pages) |
+| `{{ head \| safe }}` | Head content from child layouts (appended to parent) |
 
 ## Layout System
 
@@ -81,6 +82,25 @@ extends: base.html
 ```
 
 The `{{ content | safe }}` placeholder is where child content gets injected.
+
+## Head Block
+
+Layouts can inject content into the `<head>` section using `{{ head | safe }}`. Content BEFORE the marker goes into `<head>`, content AFTER the marker is treated as the layout body:
+
+```html
+<!-- layouts/post.html -->
+---
+extends: base.html
+---
+<link rel="stylesheet" href="/post.css">
+{{ head | safe }}
+<article class="post">
+  <h1>{{ title }}</h1>
+  {{ content | safe }}
+</article>
+```
+
+The `{{ head | safe }}` marker is where additional head content can be injected (from child layouts or page frontmatter). Content before the marker (e.g., the post.css link) is automatically placed in the parent's `<head>` section. Child layout head content is appended to parent head content (parent's head first, then child's).
 
 ## Development
 

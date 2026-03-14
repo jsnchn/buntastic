@@ -94,21 +94,55 @@ async function readLayout(layoutName: string): Promise<string> {
   return await readFile(layoutPath, "utf-8");
 }
 
-async function resolveLayout(frontmatter: Frontmatter): Promise<string> {
+async function resolveLayout(frontmatter: Frontmatter): Promise<{ template: string; head: string }> {
   const layoutName = frontmatter.layout || frontmatter.extends || "page";
   let template = await readLayout(layoutName);
 
   const extendsMatch = template.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  
+  let childHead = "";
+  let childBody = template;
+
   if (extendsMatch) {
     const parentLayout = extendsMatch[1].match(/extends:\s*(\w+)/);
     if (parentLayout) {
-      const parentTemplate = await resolveLayout({ extends: parentLayout[1] } as Frontmatter);
-      const childContent = extendsMatch[2];
-      return parentTemplate.replace(/\{\{\s*content\s*\|\s*safe\s*\}\}/g, childContent);
+      childBody = extendsMatch[2];
+      const headPlaceholderMatch = childBody.match(/(\{\{\s*head\s*\|\s*safe\s*\}\})/);
+      
+      if (headPlaceholderMatch) {
+        const placeholderIdx = headPlaceholderMatch.index || 0;
+        const beforePlaceholder = childBody.substring(0, placeholderIdx).trim();
+        const afterPlaceholder = childBody.substring(placeholderIdx + headPlaceholderMatch[0].length).trim();
+        childHead = beforePlaceholder;
+        childBody = afterPlaceholder;
+      }
+
+      const parentResult = await resolveLayout({ extends: parentLayout[1] } as Frontmatter);
+      
+      let contentReplaced = parentResult.template.replace(
+        /\{\{\s*content\s*\|\s*safe\s*\}\}/g, 
+        childBody
+      );
+      
+      const mergedHead = parentResult.head + (childHead ? "\n" + childHead : "");
+      
+      contentReplaced = contentReplaced.replace(
+        /\{\{\s*head\s*\|\s*safe\s*\}\}/g,
+        mergedHead
+      );
+      
+      return { template: contentReplaced, head: mergedHead };
     }
   }
 
-  return template;
+  let ownHead = "";
+  if (extendsMatch) {
+    const bodyMatch = extendsMatch[2];
+    const headMatch = bodyMatch.match(/\{\{\s*head\s*\|\s*safe\s*\}\}/);
+    ownHead = headMatch ? headMatch[0] : "";
+  }
+
+  return { template, head: ownHead };
 }
 
 function applyTemplate(template: string, page: Page, collection?: CollectionItem[]): string {
@@ -213,7 +247,7 @@ async function build(includeDrafts = false): Promise<void> {
   }
 
   for (const page of pages) {
-    let template = await resolveLayout(page.frontmatter);
+    let { template } = await resolveLayout(page.frontmatter);
     template = template.replace(/\{\{\s*content\s*\|\s*safe\s*\}\}/g, page.html);
 
     let collection: CollectionItem[] | undefined;
@@ -266,7 +300,7 @@ async function build(includeDrafts = false): Promise<void> {
   if (await exists(join(CONTENT_DIR, "404.md"))) {
     const page404 = await buildPage(join(CONTENT_DIR, "404.md"), includeDrafts);
     if (page404) {
-      let template = await resolveLayout(page404.frontmatter);
+      let { template } = await resolveLayout(page404.frontmatter);
       template = template.replace(/\{\{\s*content\s*\|\s*safe\s*\}\}/g, page404.html);
       const outputHtml = applyTemplate(template, page404);
       await writeFile(join(DIST_DIR, "404.html"), outputHtml);
