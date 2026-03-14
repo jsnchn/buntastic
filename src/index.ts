@@ -101,35 +101,58 @@ async function resolveLayout(frontmatter: Frontmatter): Promise<{ template: stri
   const extendsMatch = template.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   
   let childHead = "";
-  let childBody = template;
+  let childBody = "";
 
   if (extendsMatch) {
     const parentLayout = extendsMatch[1].match(/extends:\s*(\w+)/);
     if (parentLayout) {
-      childBody = extendsMatch[2];
-      const headPlaceholderMatch = childBody.match(/(\{\{\s*head\s*\|\s*safe\s*\}\})/);
+      const childContent = extendsMatch[2];
       
-      if (headPlaceholderMatch) {
-        const placeholderIdx = headPlaceholderMatch.index || 0;
-        const beforePlaceholder = childBody.substring(0, placeholderIdx).trim();
-        const afterPlaceholder = childBody.substring(placeholderIdx + headPlaceholderMatch[0].length).trim();
-        childHead = beforePlaceholder;
-        childBody = afterPlaceholder;
+      const headMatch = childContent.match(/\[head\]([\s\S]*?)\[\/head\]/);
+      if (headMatch) {
+        childHead = headMatch[1].trim();
+      }
+      
+      const bodyMatch = childContent.match(/\[content\]([\s\S]*?)\[\/content\]/);
+      if (bodyMatch) {
+        childBody = bodyMatch[1];
+      } else {
+        childBody = childContent;
       }
 
       const parentResult = await resolveLayout({ extends: parentLayout[1] } as Frontmatter);
       
-      let contentReplaced = parentResult.template.replace(
-        /\{\{\s*content\s*\|\s*safe\s*\}\}/g, 
-        childBody
-      );
+      let contentReplaced = parentResult.template;
+      
+      if (bodyMatch) {
+        contentReplaced = contentReplaced.replace(
+          /\[content\]([\s\S]*?)\[\/content\]/g, 
+          childBody
+        );
+      } else {
+        contentReplaced = contentReplaced.replace(
+          /\{\{\s*content\s*\|\s*safe\s*\}\}/g, 
+          childBody
+        );
+      }
       
       const mergedHead = parentResult.head + (childHead ? "\n" + childHead : "");
       
-      contentReplaced = contentReplaced.replace(
-        /\{\{\s*head\s*\|\s*safe\s*\}\}/g,
-        mergedHead
-      );
+      if (headMatch) {
+        contentReplaced = contentReplaced.replace(
+          /\[head\]([\s\S]*?)\[\/head\]/g,
+          mergedHead
+        );
+      } else {
+        contentReplaced = contentReplaced.replace(
+          /\[head\]([\s\S]*?)\[\/head\]/g,
+          mergedHead
+        );
+        contentReplaced = contentReplaced.replace(
+          /\{\{\s*head\s*\|\s*safe\s*\}\}/g,
+          mergedHead
+        );
+      }
       
       return { template: contentReplaced, head: mergedHead };
     }
@@ -138,8 +161,8 @@ async function resolveLayout(frontmatter: Frontmatter): Promise<{ template: stri
   let ownHead = "";
   if (extendsMatch) {
     const bodyMatch = extendsMatch[2];
-    const headMatch = bodyMatch.match(/\{\{\s*head\s*\|\s*safe\s*\}\}/);
-    ownHead = headMatch ? headMatch[0] : "";
+    const headMatch = bodyMatch.match(/\[head\]([\s\S]*?)\[\/head\]/);
+    ownHead = headMatch ? headMatch[1].trim() : "";
   }
 
   return { template, head: ownHead };

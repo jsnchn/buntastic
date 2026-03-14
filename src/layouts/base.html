@@ -6,7 +6,8 @@
   <title>{{ title }}</title>
   <meta name="description" content="{{ description }}">
   <link rel="stylesheet" href="/style.css">
-  {{ head | safe }}
+  [head]
+  [/head]
 </head>
 <body>
   <header>
@@ -17,7 +18,8 @@
     </nav>
   </header>
   <main>
-    {{ content | safe }}
+    [content]
+    [/content]
   </main>
   <footer>
     <p>Built with BunPress</p>
