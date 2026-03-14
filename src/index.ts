@@ -300,12 +300,19 @@ async function dev(): Promise<void> {
 
   const watchers = [watcher1, watcher2, watcher3];
 
+  let isBuilding = false;
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
   const rebuild = () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
+      if (isBuilding) return;
+      isBuilding = true;
       console.log("Rebuilding...");
-      await build(false);
+      try {
+        await build(false);
+      } finally {
+        isBuilding = false;
+      }
     }, 100);
   };
 
