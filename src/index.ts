@@ -292,6 +292,8 @@ async function dev(): Promise<void> {
 
   console.log(`Dev server running at http://localhost:${server.port}`);
 
+  await build(false);
+
   const watcher1 = fsWatch(CONTENT_DIR, { recursive: true });
   const watcher2 = fsWatch(LAYOUTS_DIR, { recursive: true });
   const watcher3 = fsWatch(PUBLIC_DIR, { recursive: true });
