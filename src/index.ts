@@ -9,6 +9,28 @@ const LAYOUTS_DIR = join(process.cwd(), "src/layouts");
 const PUBLIC_DIR = join(process.cwd(), "public");
 const DIST_DIR = join(process.cwd(), "dist");
 
+const MIME_TYPES: Record<string, string> = {
+  ".html": "text/html",
+  ".css": "text/css",
+  ".js": "application/javascript",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject",
+};
+
+function getMimeType(filePath: string): string {
+  const ext = extname(filePath).toLowerCase();
+  return MIME_TYPES[ext] || "application/octet-stream";
+}
+
 interface Frontmatter {
   title?: string;
   date?: string;
@@ -264,6 +286,16 @@ async function dev(): Promise<void> {
       const url = new URL(req.url);
       let path = url.pathname;
 
+      const distPath = join(DIST_DIR, path);
+
+      if (await exists(distPath)) {
+        const file = Bun.file(distPath);
+        const mimeType = getMimeType(distPath);
+        return new Response(file, {
+          headers: { "Content-Type": mimeType },
+        });
+      }
+
       if (path === "/") {
         path = "/index";
       }
@@ -336,6 +368,16 @@ async function preview(): Promise<void> {
     async fetch(req) {
       const url = new URL(req.url);
       let path = url.pathname;
+
+      const distPath = join(DIST_DIR, path);
+
+      if (await exists(distPath)) {
+        const file = Bun.file(distPath);
+        const mimeType = getMimeType(distPath);
+        return new Response(file, {
+          headers: { "Content-Type": mimeType },
+        });
+      }
 
       if (path === "/") {
         path = "/index";
