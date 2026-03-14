@@ -320,6 +320,16 @@ async function dev(): Promise<void> {
     for (const watcher of watchers) {
       (async () => {
         for await (const event of watcher) {
+          const filename = event.filename || "";
+          const isPublicFile = filename.includes("public");
+
+          if (isPublicFile) {
+            const ext = filename.split(".").pop()?.toLowerCase();
+            if (ext !== "css" && ext !== "js" && ext !== "ts") {
+              continue;
+            }
+          }
+
           console.log(`[${event.eventType}] ${event.filename} - rebuilding...`);
           rebuild();
         }
