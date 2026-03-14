@@ -356,6 +356,14 @@ async function dev(): Promise<void> {
     fsWatch(dir, { recursive: true }, (eventType, filename) => {
       if (!filename) return;
       if (filename.endsWith("~") || filename.startsWith(".")) return;
+
+      if (dir === PUBLIC_DIR) {
+        const ext = filename.split(".").pop()?.toLowerCase();
+        if (ext && !["css", "js", "ts", "mjs"].includes(ext)) {
+          return;
+        }
+      }
+
       console.log(`[${eventType}] ${filename} - rebuilding...`);
       scheduleBuild();
     });
