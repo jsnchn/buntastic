@@ -289,11 +289,14 @@ async function dev(): Promise<void> {
       const distPath = join(DIST_DIR, path);
 
       if (await exists(distPath)) {
-        const file = Bun.file(distPath);
-        const mimeType = getMimeType(distPath);
-        return new Response(file, {
-          headers: { "Content-Type": mimeType },
-        });
+        const stat = await import("fs").then(fs => fs.statSync(distPath));
+        if (stat.isFile()) {
+          const file = Bun.file(distPath);
+          const mimeType = getMimeType(distPath);
+          return new Response(file, {
+            headers: { "Content-Type": mimeType },
+          });
+        }
       }
 
       if (path === "/") {
@@ -372,11 +375,14 @@ async function preview(): Promise<void> {
       const distPath = join(DIST_DIR, path);
 
       if (await exists(distPath)) {
-        const file = Bun.file(distPath);
-        const mimeType = getMimeType(distPath);
-        return new Response(file, {
-          headers: { "Content-Type": mimeType },
-        });
+        const stat = await import("fs").then(fs => fs.statSync(distPath));
+        if (stat.isFile()) {
+          const file = Bun.file(distPath);
+          const mimeType = getMimeType(distPath);
+          return new Response(file, {
+            headers: { "Content-Type": mimeType },
+          });
+        }
       }
 
       if (path === "/") {
