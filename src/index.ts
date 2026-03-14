@@ -1,5 +1,6 @@
 import { mkdir, writeFile, readFile, copyFile, exists } from "fs/promises";
-import { watch as fsWatch } from "fs/promises";
+import { watch as fsWatch } from "node:fs";
+import { spawn } from "node:child_process";
 import { join, relative, dirname, extname } from "path";
 import { Glob } from "bun";
 
@@ -294,48 +295,36 @@ async function dev(): Promise<void> {
 
   await build(false);
 
-  const watcher1 = fsWatch(CONTENT_DIR, { recursive: true });
-  const watcher2 = fsWatch(LAYOUTS_DIR, { recursive: true });
-  const watcher3 = fsWatch(PUBLIC_DIR, { recursive: true });
-
-  const watchers = [watcher1, watcher2, watcher3];
-
-  let isBuilding = false;
+  let buildRunning = false;
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-  const rebuild = () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(async () => {
-      if (isBuilding) return;
-      isBuilding = true;
-      console.log("Rebuilding...");
-      try {
-        await build(false);
-      } finally {
-        isBuilding = false;
-      }
-    }, 100);
-  };
 
-  (async () => {
-    for (const watcher of watchers) {
-      (async () => {
-        for await (const event of watcher) {
-          const filename = event.filename || "";
-          const isPublicFile = filename.includes("public");
+  function runBuild() {
+    if (buildRunning) return;
+    buildRunning = true;
+    console.log("Rebuilding...");
+    const proc = spawn("bun", ["run", "build"], {
+      stdio: "inherit",
+      env: { ...process.env, NODE_ENV: "development" },
+    });
+    proc.on("exit", () => {
+      buildRunning = false;
+    });
+  }
 
-          if (isPublicFile) {
-            const ext = filename.split(".").pop()?.toLowerCase();
-            if (ext !== "css" && ext !== "js" && ext !== "ts") {
-              continue;
-            }
-          }
+  function scheduleBuild() {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(runBuild, 100);
+  }
 
-          console.log(`[${event.eventType}] ${event.filename} - rebuilding...`);
-          rebuild();
-        }
-      })();
-    }
-  })();
+  const watchDirs = [CONTENT_DIR, LAYOUTS_DIR, PUBLIC_DIR];
+  for (const dir of watchDirs) {
+    fsWatch(dir, { recursive: true }, (eventType, filename) => {
+      if (!filename) return;
+      if (filename.endsWith("~") || filename.startsWith(".")) return;
+      console.log(`[${eventType}] ${filename} - rebuilding...`);
+      scheduleBuild();
+    });
+  }
 }
 
 async function preview(): Promise<void> {
