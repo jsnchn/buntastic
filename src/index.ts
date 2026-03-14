@@ -1,4 +1,5 @@
 import { mkdir, writeFile, readFile, copyFile, exists } from "fs/promises";
+import { watch as fsWatch } from "fs/promises";
 import { join, relative, dirname, extname } from "path";
 import { Glob } from "bun";
 
@@ -291,11 +292,31 @@ async function dev(): Promise<void> {
 
   console.log(`Dev server running at http://localhost:${server.port}`);
 
-  const watcher = Bun.watch([CONTENT_DIR, LAYOUTS_DIR, PUBLIC_DIR]);
-  for await (const event of watcher) {
-    console.log(`[${event.kind}] ${event.path} - rebuilding...`);
-    await build(false);
-  }
+  const watcher1 = fsWatch(CONTENT_DIR, { recursive: true });
+  const watcher2 = fsWatch(LAYOUTS_DIR, { recursive: true });
+  const watcher3 = fsWatch(PUBLIC_DIR, { recursive: true });
+
+  const watchers = [watcher1, watcher2, watcher3];
+
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+  const rebuild = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      console.log("Rebuilding...");
+      await build(false);
+    }, 100);
+  };
+
+  (async () => {
+    for (const watcher of watchers) {
+      (async () => {
+        for await (const event of watcher) {
+          console.log(`[${event.eventType}] ${event.filename} - rebuilding...`);
+          rebuild();
+        }
+      })();
+    }
+  })();
 }
 
 async function preview(): Promise<void> {
