@@ -164,11 +164,12 @@ extends: base.html
 | Variable | Description |
 |----------|-------------|
 | `{{ title }}` | Page title |
-| `{{ content \| safe }}` | Rendered markdown HTML |
+| `{{ content | safe }}` | Rendered markdown HTML |
 | `{{ date }}` | Page date |
 | `{{ description }}` | Meta description |
 | `{{ url }}` | Current page URL |
 | `{{ collection }}` | List of posts in current folder (for index pages) |
+| `{{ head | safe }}` | Head content from child layouts (appended to parent) |
 
 ### Layout Inheritance
 
@@ -186,6 +187,25 @@ Use `extends:` to build on top of other layouts:
 </body>
 </html>
 ```
+
+### Head Block
+
+Layouts can inject content into the `<head>` section using `{{ head | safe }}`. Content BEFORE the marker goes into `<head>`, content AFTER the marker is treated as the layout body:
+
+```html
+<!-- layouts/post.html -->
+---
+extends: base.html
+---
+<link rel="stylesheet" href="/post.css">
+{{ head | safe }}
+<article class="post">
+  <h1>{{ title }}</h1>
+  {{ content | safe }}
+</article>
+```
+
+The `{{ head | safe }}` marker is where additional head content can be injected. Content before the marker is automatically placed in the parent's `<head>` section. Child layout head content is appended to parent head content.
 
 ## Collections
 
