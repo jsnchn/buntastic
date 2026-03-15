@@ -111,9 +111,10 @@ async function resolveLayout(frontmatter: Frontmatter): Promise<{ template: stri
       const headMatch = childContent.match(/\[head\]([\s\S]*?)\[\/head\]/);
       if (headMatch) {
         childHead = headMatch[1].trim();
+        childBody = childContent.replace(headMatch[0], '').trim();
+      } else {
+        childBody = childContent;
       }
-      
-      childBody = childContent;
 
       const parentResult = await resolveLayout({ extends: parentLayout[1] } as Frontmatter);
       
